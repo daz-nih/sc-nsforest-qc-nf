@@ -56,12 +56,12 @@ def run_prep(h5ad_path, cluster_header, organ, first_author, journal, year, embe
 
     # Capture the ENSG->symbol map up front, from the freshly loaded adata, so the
     # symbol outputs never depend on `adata` surviving the prep calls below.
-    if 'gene_symbol' in adata.var.columns:
-        sym_map = dict(zip(adata.var_names, adata.var['gene_symbol']))
-    else:
-        sym_map = None
-        logger.warning("adata.var['gene_symbol'] missing — symbol outputs will be skipped")
-
+    #if 'gene_symbol' in adata.var.columns:
+    #    sym_map = dict(zip(adata.var_names, adata.var['gene_symbol']))
+    #else:
+    #    sym_map = None
+    #    logger.warning("adata.var['gene_symbol'] missing — symbol outputs will be skipped")
+    sym_map = None
     # One densifying pass. No .copy(): prep_medians subsets positive genes into a NEW
     # object and only adds to varm — it never mutates adata.X — so a copy just doubles peak RAM.
     logger.info("Running ns.pp.prep_medians()...")
@@ -74,6 +74,13 @@ def run_prep(h5ad_path, cluster_header, organ, first_author, journal, year, embe
     adata_prep = ns.pp.prep_binary_scores(adata_prep, cluster_header)
     df_binary = _varm_to_df(adata_prep, 'binary_scores_' + cluster_header)
     logger.info(f"Binary scores shape: {df_binary.shape}")
+
+    #calculate proportions of cells in each cluster expressing each gene
+    for cl in (sorted(set(adata.obs[cluster_header]))):
+        adata_cl = adata[adata.obs[cluster_header]==cl,] 
+        proportions = adata_cl.to_df()
+    
+
 
     _write_pair(df_medians, sym_map, prefix, 'medians')
     _write_pair(df_binary, sym_map, prefix, 'binary_scores')
