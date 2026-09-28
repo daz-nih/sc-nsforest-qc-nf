@@ -11,14 +11,6 @@ include { filter_adata_process }           from './modules/nsforest/filter_adata
 include { generate_s3_manifest_process }   from './modules/publish/generate_s3_manifest.nf'
 include { merge_nsforest_results_process } from './modules/nsforest/merge_nsforest_results.nf'
 include { prep_process }                   from './modules/nsforest/prep.nf'
-include { plot_histograms_process }        from './modules/nsforest/plot_histograms.nf'
-include { plots_process }                  from './modules/nsforest/plots.nf'
-include { publish_results_process }        from './modules/publish/publish_results.nf'
-include { run_nsforest_process }           from './modules/nsforest/run_nsforest.nf'
-include { compute_summary_stats_process }  from './modules/scsilhouette/compute_summary_stats.nf'
-include { viz_2D_projection_process }      from './modules/scsilhouette/viz_2D_projection.nf'
-include { viz_distribution_process }       from './modules/scsilhouette/viz_distribution.nf'
-include { viz_summary_process }            from './modules/scsilhouette/viz_summary.nf'
 
 params.batch_size        = 5
 params.datasets_csv      = null
