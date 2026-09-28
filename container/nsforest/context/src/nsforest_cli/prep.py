@@ -76,12 +76,15 @@ def run_prep(h5ad_path, cluster_header, organ, first_author, journal, year, embe
     logger.info(f"Binary scores shape: {df_binary.shape}")
 
     #calculate proportions of cells in each cluster expressing each gene
+    cluster_props = pd.DataFrame()
     for cl in (sorted(set(adata.obs[cluster_header]))):
         adata_cl = adata[adata.obs[cluster_header]==cl,] 
-        proportions = adata_cl.to_df()
-    
+        adata_df = adata_cl.to_df()
+        proportions = (adata_df > 0).mean(axis=0)
+        cluster_props = pd.concat([cluster_props, proportions.rename(cl)], axis=1)
+    cluster_props.index.name = 'gene'
 
-
+    _write_pair(cluster_props, sym_map, prefix, 'proportions')
     _write_pair(df_medians, sym_map, prefix, 'medians')
     _write_pair(df_binary, sym_map, prefix, 'binary_scores')
 
