@@ -226,30 +226,6 @@ def prep_command(
     from .prep import run_prep
     run_prep(h5ad_path, cluster_header, organ, first_author, journal, year, embedding, dataset_version_id)
 
-@app.command("run-nsforest")
-def run_nsforest_command(
-    h5ad_path: Path = typer.Option(..., help="Path to adata_filtered.h5ad"),
-    medians_csv: Path = typer.Option(..., help="Path to medians CSV"),
-    binary_scores_csv: Path = typer.Option(..., help="Path to binary scores CSV"),
-    cluster_header: str = typer.Option(..., help="Column name for clusters"),
-    organ: str = typer.Option(..., help="Organ/tissue"),
-    first_author: str = typer.Option(..., help="First author"),
-    journal: str = typer.Option(..., help="Journal"),
-    year: str = typer.Option(..., help="Publication year"),
-    embedding: str = typer.Option("", help="Embedding key"),
-    dataset_version_id: str = typer.Option("", help="Dataset version ID"),
-    cluster_list: str = typer.Option(None, help="Comma-separated cluster list (for parallelization)"),
-    n_trees: int = typer.Option(1000, help="Number of trees in random forest"),
-    n_genes_eval: int = typer.Option(6, help="Number of top genes to evaluate"),
-    max_cells_per_cluster: int = typer.Option(0, help="Cap cells per cluster for the RF/eval (0 = no cap). Full-data medians/binary scores unaffected."),
-    seed: int = typer.Option(42, help="Random seed for the max-cells-per-cluster subsample"),
-):
-    """Run NSForest algorithm to identify marker genes."""
-    from .run_nsforest import run_nsforest
-    clusters = cluster_list.split(',') if cluster_list else None
-    run_nsforest(h5ad_path, medians_csv, binary_scores_csv, cluster_header,
-                 organ, first_author, journal, year, embedding, dataset_version_id, clusters, n_trees, n_genes_eval,
-                 max_cells_per_cluster=max_cells_per_cluster, seed=seed)
 
 
 if __name__ == "__main__":
