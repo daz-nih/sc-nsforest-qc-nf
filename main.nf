@@ -121,78 +121,78 @@ workflow {
     prep_output_ch = prep_process(filtered_h5ad_ch)
 
     // Step 3: Plot histograms
-    plot_histograms_process(
-        prep_output_ch.medians_csv
-            .join(prep_output_ch.binary_csv)
-    )
+    //plot_histograms_process(
+    //    prep_output_ch.medians_csv
+    //        .join(prep_output_ch.binary_csv)
+    //)
 
     // Step 4: Scatter run_nsforest by cluster batch
-    def batchSize = params.batch_size ?: 5
+    //def batchSize = params.batch_size ?: 5
 
-    nsforest_input_ch = filtered_h5ad_ch
-        .join(prep_output_ch.medians_csv)
-        .join(prep_output_ch.binary_csv)
-        .join(dendrogram_output_ch.cluster_order)
-        .flatMap { meta, h5ad, medians_csv, binary_csv, cluster_order_csv ->
-            def clusters = cluster_order_csv
-                .splitCsv(header: true)
-                .collect { it.cluster_order }
-            clusters.collate(batchSize).collect { batch ->
-                tuple(meta, h5ad, medians_csv, binary_csv, batch.join(','))
-            }
-        }
+    //nsforest_input_ch = filtered_h5ad_ch
+    //    .join(prep_output_ch.medians_csv)
+    //    .join(prep_output_ch.binary_csv)
+    //    .join(dendrogram_output_ch.cluster_order)
+    //    .flatMap { meta, h5ad, medians_csv, binary_csv, cluster_order_csv ->
+    //        def clusters = cluster_order_csv
+    //            .splitCsv(header: true)
+    //            .collect { it.cluster_order }
+    //        clusters.collate(batchSize).collect { batch ->
+    //            tuple(meta, h5ad, medians_csv, binary_csv, batch.join(','))
+    //        }
+    //    }
 
-    nsforest_output_ch = run_nsforest_process(nsforest_input_ch)
+    //nsforest_output_ch = run_nsforest_process(nsforest_input_ch)
 
     // Step 5: Merge NSForest results (ENSG merge + symbol derivation from filtered h5ad)
-    merge_input_ch = nsforest_output_ch.partial.groupTuple()
-        .map { meta, file_lists -> tuple(meta, file_lists.flatten()) }
-        .join(filtered_h5ad_ch)
+    //merge_input_ch = nsforest_output_ch.partial.groupTuple()
+    //    .map { meta, file_lists -> tuple(meta, file_lists.flatten()) }
+    //    .join(filtered_h5ad_ch)
 
-    merged_nsforest_ch = merge_nsforest_results_process(merge_input_ch)
+    //merged_nsforest_ch = merge_nsforest_results_process(merge_input_ch)
     
     // Step 6: Plots
-    plots_process(
-        filtered_h5ad_ch
-            .join(merged_nsforest_ch.results_csv)
-    )
+    //plots_process(
+    //    filtered_h5ad_ch
+    //        .join(merged_nsforest_ch.results_csv)
+    //)
 
     // Step 7: Compute silhouette
-    silhouette_output_ch = compute_silhouette_process(filtered_h5ad_ch)
+    //silhouette_output_ch = compute_silhouette_process(filtered_h5ad_ch)
 
     // Step 8a: viz_summary
-    viz_summary_process(
-        silhouette_output_ch.scores
-            .join(silhouette_output_ch.cluster_summary)
-            .join(silhouette_output_ch.annotation)
-            .join(merged_nsforest_ch.results_csv)
-            .map { meta, scores, summary, annotation, nsforest_csv ->
-                tuple(meta, scores, summary, annotation, nsforest_csv ?: file('NO_FILE'))
-            }
-    )
+    //viz_summary_process(
+    //    silhouette_output_ch.scores
+    //        .join(silhouette_output_ch.cluster_summary)
+    //        .join(silhouette_output_ch.annotation)
+    //        .join(merged_nsforest_ch.results_csv)
+    //        .map { meta, scores, summary, annotation, nsforest_csv ->
+    //            tuple(meta, scores, summary, annotation, nsforest_csv ?: file('NO_FILE'))
+    //        }
+    //)
     
     // Step 8b: viz_distribution
-    viz_distribution_process(
-        silhouette_output_ch.scores
-            .join(silhouette_output_ch.cluster_summary)
-            .join(silhouette_output_ch.annotation)
-    )
+    //viz_distribution_process(
+    //    silhouette_output_ch.scores
+    //        .join(silhouette_output_ch.cluster_summary)
+    //        .join(silhouette_output_ch.annotation)
+    //)
 
     // Step 8c: viz_2D_projection
-    viz_2D_projection_process(filtered_h5ad_ch)
+    //viz_2D_projection_process(filtered_h5ad_ch)
 
     // Step 8d: compute_summary_stats
-    compute_summary_stats_process(
-        filtered_h5ad_ch
-            .join(silhouette_output_ch.scores)
-            .join(silhouette_output_ch.cluster_summary)
-            .join(silhouette_output_ch.annotation)
-            .join(merged_nsforest_ch.results_csv)
-            .map { meta, h5ad, scores, cluster_summary, annotation, nsforest_csv ->
-                def new_meta = meta + [filtered_h5ad_path: h5ad.toUriString()]
-                tuple(new_meta, scores, cluster_summary, annotation, nsforest_csv ?: file('NO_FILE'))
-            }
-    )
+    //compute_summary_stats_process(
+    //    filtered_h5ad_ch
+    //        .join(silhouette_output_ch.scores)
+    //        .join(silhouette_output_ch.cluster_summary)
+    //        .join(silhouette_output_ch.annotation)
+    //        .join(merged_nsforest_ch.results_csv)
+    //        .map { meta, h5ad, scores, cluster_summary, annotation, nsforest_csv ->
+    //            def new_meta = meta + [filtered_h5ad_path: h5ad.toUriString()]
+    //            tuple(new_meta, scores, cluster_summary, annotation, nsforest_csv ?: file('NO_FILE'))
+    //        }
+    //)
 
     // Step 9: Publish + S3 Manifest
     def s3_results_base = workflow.workDir.parent.toUriString() + '/results'
